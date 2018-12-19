@@ -11,7 +11,7 @@ from django.db import models
 class Interfaces(models.Model):
     mac = models.CharField(db_column='MAC', primary_key=True, max_length=30)  # Field name made lowercase.
     matb = models.ForeignKey('Thietbi', models.DO_NOTHING, db_column='MaTB', blank=True, null=True)  # Field name made lowercase.
-    tenif = models.CharField(db_column='TenIF', max_length=255, blank=True, null=True)  # Field name made lowercase.
+    tenif = models.TextField(db_column='TenIF', blank=True, null=True)  # Field name made lowercase.
     idx = models.IntegerField(blank=True, null=True)
     ipaddv4 = models.CharField(max_length=30, blank=True, null=True)
     inbound = models.FloatField(blank=True, null=True)

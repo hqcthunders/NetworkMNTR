@@ -29,24 +29,14 @@ def calculate_bandwidth(idx, ip):
     errorIndication, errorStatus, errorIndex, varBinds = cmdGen.getCmd(
     cmdgen.CommunityData(SNMP_COMMUNITY),
     cmdgen.UdpTransportTarget((ip, SNMP_PORT)),
-    ".1.3.6.1.2.1.2.2.1.10.{}".format(idx),
-    ".1.3.6.1.2.1.2.2.1.16.{}".format(idx),
-    ".1.3.6.1.2.1.2.2.1.5.{}".format(idx)
+                ".1.3.6.1.2.1.2.2.1.10.{}".format(idx),
+                ".1.3.6.1.2.1.2.2.1.16.{}".format(idx),
+                ".1.3.6.1.2.1.2.2.1.5.{}".format(idx)
     )
     ifinOctets, ifoutOctets, ifspeed = list(map(int, [value.prettyPrint().split("= ")[1] for value in varBinds]))
-    times = 1
-    time.sleep(1)
-    errorIndication, errorStatus, errorIndex, varBinds = cmdGen.getCmd(
-    cmdgen.CommunityData(SNMP_COMMUNITY),
-    cmdgen.UdpTransportTarget((ip, SNMP_PORT)),
-    ".1.3.6.1.2.1.2.2.1.10.{}".format(idx),
-    ".1.3.6.1.2.1.2.2.1.16.{}".format(idx),
-    ".1.3.6.1.2.1.2.2.1.5.{}".format(idx)
-    )
-    ifinOctets2, ifoutOctets2, ifspeed2 = list(map(int, [value.prettyPrint().split("= ")[1] for value in varBinds]))
-    inbound = ifinOctets2 - ifinOctets
-    outbound = ifoutOctets2 - ifoutOctets
-    return ((inbound/times) * 8)/1024, ((outbound/times) * 8)/1024
+    inbound = (ifinOctets * 8 * 100) / ifspeed
+    outbound = (ifoutOctets * 8 * 100) / ifspeed
+    return inbound, outbound
 
 
 def find_list_ip(network, exclude):
@@ -84,6 +74,7 @@ def auto_find_connection():
     for MaPB, network in list_network:
         ips = find_list_ip(network, exclude)
         for ip in ips:
+            print(ip)
             MaTB, TenTB, socong = save_information(ip)
             if "Linux" in TenTB:
                 TenTB = "Linux "+ ip
@@ -95,7 +86,7 @@ def auto_find_connection():
                                                                                            socong, 1)
             conn.execute(sql)
             db.commit()
-            idx = get_result(ip, [".1.3.6.1.2.1.4.20.1.2.{}".format(ip)])[0]
+            idx = get_result(ip, [".1.3.6.1.2.1.2.2.1.2.{}".format(ip)])[0]
             oid = [".1.3.6.1.2.1.2.2.1.2.{}".format(idx), ".1.3.6.1.2.1.2.2.1.6.{}".format(idx)]
             tenif, mac = get_result(ip, oid)
             mac = mac[2:].upper()
@@ -138,7 +129,7 @@ def auto_update_bandwidth():
 
 def main():
     auto_find_connection()
-    #auto_update_bandwidth()
+    # auto_update_bandwidth()
 
 
 if __name__ == "__main__":
